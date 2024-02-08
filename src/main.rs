@@ -23,6 +23,7 @@ struct Progress<Iter> {
     iter: Iter,
     i: usize,
     bound: Option<usize>,
+    delims: (char, char),
 }
 
 impl<Iter> Progress<Iter> {
@@ -31,6 +32,7 @@ impl<Iter> Progress<Iter> {
             iter,
             i: 0,
             bound: None,
+            delims: ('[', ']'),
         }
     }
 }
@@ -41,6 +43,11 @@ where
 {
     fn with_bounds(mut self) -> Self {
         self.bound = Some(self.iter.len());
+        self
+    }
+
+    fn with_delims(mut self, delims: (char, char)) -> Self {
+        self.delims = delims;
         self
     }
 }
@@ -55,7 +62,13 @@ where
         print!("{}", CLEAR);
         match self.bound {
             Some(bound) => {
-                println!("[{}{}]", "*".repeat(self.i), " ".repeat(bound - self.i))
+                println!(
+                    "{}{}{}{}",
+                    self.delims.0,
+                    "*".repeat(self.i),
+                    " ".repeat(bound - self.i),
+                    self.delims.1
+                )
             }
             None => println!("{}", "*".repeat(self.i)),
         };
@@ -81,14 +94,15 @@ where
 
 fn main() {
     let v = vec![1, 2, 3];
+    let brkts = ('<', '>');
 
     // progress(v.iter(), expensive_calculation);
 
-    for n in v.iter().progress().with_bounds() {
+    for n in v.iter().progress().with_bounds().with_delims(brkts) {
         expensive_calculation(n);
     }
 
-    // for i in (0..).progress() {
+    // for i in (0..).progress().with_delims(brkts) {
     //     expensive_calculation(&i)
     // }
 }
