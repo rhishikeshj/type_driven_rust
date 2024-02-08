@@ -22,11 +22,26 @@ where
 struct Progress<Iter> {
     iter: Iter,
     i: usize,
+    bound: Option<usize>,
 }
 
 impl<Iter> Progress<Iter> {
     fn new(iter: Iter) -> Self {
-        Progress { iter, i: 0 }
+        Progress {
+            iter,
+            i: 0,
+            bound: None,
+        }
+    }
+}
+
+impl<Iter> Progress<Iter>
+where
+    Iter: ExactSizeIterator,
+{
+    fn with_bounds(mut self) -> Self {
+        self.bound = Some(self.iter.len());
+        self
     }
 }
 
@@ -37,7 +52,14 @@ where
     type Item = Iter::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
-        println!("{}{}", CLEAR, "*".repeat(self.i));
+        print!("{}", CLEAR);
+        match self.bound {
+            Some(bound) => {
+                println!("[{}{}]", "*".repeat(self.i), " ".repeat(bound - self.i))
+            }
+            None => println!("{}", "*".repeat(self.i)),
+        };
+
         self.i += 1;
 
         self.iter.next()
@@ -62,7 +84,11 @@ fn main() {
 
     // progress(v.iter(), expensive_calculation);
 
-    for n in v.iter().progress() {
+    for n in v.iter().progress().with_bounds() {
         expensive_calculation(n);
     }
+
+    // for i in (0..).progress() {
+    //     expensive_calculation(&i)
+    // }
 }
