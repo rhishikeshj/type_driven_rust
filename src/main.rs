@@ -19,16 +19,37 @@ where
     }
 }
 
+struct Progress<Iter> {
+    iter: Iter,
+    i: usize,
+}
+
+impl<Iter> Progress<Iter> {
+    fn new(iter: Iter) -> Self {
+        Progress { iter, i: 0 }
+    }
+}
+
+impl<Iter> Iterator for Progress<Iter>
+where
+    Iter: Iterator,
+{
+    type Item = Iter::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        println!("{}{}", CLEAR, "*".repeat(self.i));
+        self.i += 1;
+
+        self.iter.next()
+    }
+}
+
 fn main() {
     let v = vec![1, 2, 3];
 
-    progress(v.iter(), expensive_calculation);
+    // progress(v.iter(), expensive_calculation);
 
-    let mut h = HashSet::new();
-    h.insert(0);
-    h.insert(2);
-    h.insert(4);
-    h.insert(6);
-
-    progress(h.iter(), expensive_calculation);
+    for n in Progress::new(v.iter()) {
+        expensive_calculation(n);
+    }
 }
