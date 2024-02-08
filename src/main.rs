@@ -44,12 +44,25 @@ where
     }
 }
 
+trait ProgressIteratorExt: Sized {
+    fn progress(self) -> Progress<Self>;
+}
+
+impl<Iter> ProgressIteratorExt for Iter
+where
+    Iter: Iterator,
+{
+    fn progress(self) -> Progress<Self> {
+        Progress::new(self)
+    }
+}
+
 fn main() {
     let v = vec![1, 2, 3];
 
     // progress(v.iter(), expensive_calculation);
 
-    for n in Progress::new(v.iter()) {
+    for n in v.iter().progress() {
         expensive_calculation(n);
     }
 }
